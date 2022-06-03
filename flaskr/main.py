@@ -2,6 +2,7 @@ from crypt import methods
 import io
 from tracemalloc import stop
 from urllib import response
+from PIL import Image
 
 from flask import (Flask, flash, jsonify, make_response, redirect, request,
                    send_file)
@@ -13,12 +14,17 @@ app.secret_key = "secret key"
 
 @app.route("/", methods=['GET'])
 def hello_world():
+	"""Handles get requests to the API."""
+
 	response = {'message': "Welcome to Salsa20 cipher"}
 	return response
 
 
 @app.route("/encrypt-text/", methods=['POST'])
 def encrypt_text():
+	"""Handles requests to encrypt or decrypt
+	text with Salsa20 stream cipher."""
+
 	if request.method == 'POST':
 		to_be_encoded = request.get_json()['message']
 		result = __salsa_encrypt_text(to_be_encoded)
@@ -30,8 +36,11 @@ def encrypt_text():
 		return response
 
 
-@app.route("/encrypt-image/", methods=['POST'])
+@app.route("/encrypt-image/", methods=['GET','POST'])
 def encrypt_image():
+	"""Handles requests to encrypt or decrypt
+	an image with Salsa20 stream cipher."""
+
 	if request.method == 'POST':
 		if 'file' not in request.files:
 			flash('No file part')
@@ -43,6 +52,10 @@ def encrypt_image():
 			return redirect(request.url)
 
 		fileBytes = request.files['file'].read()
+		im = Image.open(fileBytes)
+		print(im)
+
+
 		image = bytearray(fileBytes)
 
 		result = __salsa_encrypt_image(image)
@@ -51,20 +64,20 @@ def encrypt_image():
 
 
 def __salsa_encrypt_image(image: bytearray) -> list:
-	"""Encrypts or decrypts an image with Salsa20 Symmetric Stream Cypher.\n
-	Salsa20 output is a 64 bytes array, divided into 16 integers."""
+	"""Encrypts or decrypts an image with Salsa20 Symmetric Stream Cypher."""
 
 	s = Salsa()
 	salsa20 = s()
 	result = []
 	salsa20 = __int_array_to_bytes_array(salsa20)
-	print(image)
 	for i in enumerate(image):
 		result.append(salsa20[i % 64] ^ image[i])
 	return result
 
 
 def __int_array_to_bytes_array(salsa20: list) -> list:
+	"""Converts an int array from Salsa20 to a bytes array."""
+
 	bytes_array = []
 	for i in range(len(salsa20)):
 		temporal_array = salsa20[i].to_bytes(4, 'big')
@@ -75,6 +88,8 @@ def __int_array_to_bytes_array(salsa20: list) -> list:
 
 
 def __salsa_encrypt_text(text: str) -> list :
+	"""Encrypts or decrypts a plain text with Salsa20 Symmetric Stream Cypher."""
+
 	s = Salsa()
 	salsa20 = s()
 	result = []
@@ -87,15 +102,17 @@ def __salsa_encrypt_text(text: str) -> list :
 
 
 def __string_to_bytes_array(text: str) -> list:
+	"""Converts a string into a bytes array."""
+
 	char_array = split(text)
-	print(char_array)
 
 	bytes_array = []
 	for i in range(len(char_array)):
 		bytes_array.append(ord(char_array[i]).to_bytes(1, 'big')[0])
 	
-	print(bytes_array)
 	return bytes_array
 
 def split(text: str):
-    return [char for char in text]
+	"""Splits a string into a char array."""
+	
+	return [char for char in text]
