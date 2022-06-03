@@ -6,6 +6,7 @@ from PIL import Image
 
 from flask import (Flask, flash, jsonify, make_response, redirect, request,
                    send_file)
+from httplib2 import Response
 
 from salsa import Salsa
 
@@ -36,7 +37,7 @@ def encrypt_text():
 		return response
 
 
-@app.route("/encrypt-image/", methods=['GET','POST'])
+@app.route("/encrypt-image/", methods=['POST'])
 def encrypt_image():
 	"""Handles requests to encrypt or decrypt
 	an image with Salsa20 stream cipher."""
@@ -51,10 +52,7 @@ def encrypt_image():
 			flash('No file selected for uploading')
 			return redirect(request.url)
 
-		fileBytes = request.files['file'].read()
-		im = Image.open(fileBytes)
-		print(im)
-
+		fileBytes = file.read()
 
 		image = bytearray(fileBytes)
 
@@ -70,7 +68,7 @@ def __salsa_encrypt_image(image: bytearray) -> list:
 	salsa20 = s()
 	result = []
 	salsa20 = __int_array_to_bytes_array(salsa20)
-	for i in enumerate(image):
+	for i in range(len(image)):
 		result.append(salsa20[i % 64] ^ image[i])
 	return result
 
