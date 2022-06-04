@@ -52,23 +52,38 @@ def encrypt_image():
 			flash('No file selected for uploading')
 			return redirect(request.url)
 
-		fileBytes = file.read()
+		im = Image.open(file)
+		im = im.convert('P')
 
-		image = bytearray(fileBytes)
+		result = __salsa_encrypt_image(im)
+		img_io = io.BytesIO()
+		result.save(img_io, 'PNG', quality=100)
+		img_io.seek(0)
+	
+		return send_file(img_io, 'image/png')
 
-		result = __salsa_encrypt_image(image)
 
-		return send_file(io.BytesIO(bytes(result)), 'image/png')
-
-
-def __salsa_encrypt_image(image: bytearray) -> list:
+def __salsa_encrypt_image(image: Image) -> Image:
 	"""Encrypts or decrypts an image with Salsa20 Symmetric Stream Cypher."""
 
 	s = Salsa()
 	salsa20 = s()
 	result = []
 	salsa20 = __int_array_to_bytes_array(salsa20)
-	for i in range(len(image)):
+	pixel_map = image.load()
+	width = image.size[0]
+	height = image.size[1]
+
+	z = 0
+	for i in range(width):
+		for j in range(height):
+			pixel_map[i,j] = salsa20[z % 64] ^ pixel_map[i,j]
+			z = z + 1
+
+	return image
+
+	for i in range(len(pixels)):
+		
 		result.append(salsa20[i % 64] ^ image[i])
 	return result
 
