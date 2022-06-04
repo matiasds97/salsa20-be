@@ -53,7 +53,7 @@ def encrypt_image():
 			return redirect(request.url)
 
 		im = Image.open(file)
-		im = im.convert('P')
+		im = im.convert("RGB")
 
 		result = __salsa_encrypt_image(im)
 		img_io = io.BytesIO()
@@ -66,6 +66,7 @@ def encrypt_image():
 def __salsa_encrypt_image(image: Image) -> Image:
 	"""Encrypts or decrypts an image with Salsa20 Symmetric Stream Cypher."""
 
+
 	s = Salsa()
 	salsa20 = s()
 	result = []
@@ -77,15 +78,14 @@ def __salsa_encrypt_image(image: Image) -> Image:
 	z = 0
 	for i in range(width):
 		for j in range(height):
-			pixel_map[i,j] = salsa20[z % 64] ^ pixel_map[i,j]
+			r, g, b = pixel_map[i,j]
+			r = salsa20[z % 64] ^ r
+			g = salsa20[z % 64] ^ g
+			b = salsa20[z % 64] ^ b
+			pixel_map[i,j] = r, g, b
 			z = z + 1
 
 	return image
-
-	for i in range(len(pixels)):
-		
-		result.append(salsa20[i % 64] ^ image[i])
-	return result
 
 
 def __int_array_to_bytes_array(salsa20: list) -> list:
