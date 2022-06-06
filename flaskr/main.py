@@ -1,16 +1,14 @@
 from crypt import methods
 import io
-from tracemalloc import stop
-from urllib import response
+from os import stat
 from PIL import Image
 
-from flask import (Flask, flash, jsonify, make_response, redirect, request,
-                   send_file)
-from httplib2 import Response
-
+from flask import (Flask, flash, make_response, redirect, request, send_file)
+from flask_cors import CORS, cross_origin
 from salsa import Salsa
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 app.secret_key = "secret key"
 
 @app.route("/", methods=['GET'])
@@ -34,7 +32,8 @@ def encrypt_text():
 			message.append(chr(result[i]))
 		message = ''.join(message)
 		response = {'message': message}
-		return response
+		return response, 200
+		# return response
 
 
 @app.route("/encrypt-image/", methods=['POST'])
@@ -129,3 +128,11 @@ def split(text: str):
 	"""Splits a string into a char array."""
 	
 	return [char for char in text]
+
+
+def _build_cors_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
