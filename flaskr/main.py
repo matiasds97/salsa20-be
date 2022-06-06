@@ -1,10 +1,7 @@
-from crypt import methods
 import io
-from os import stat
 from PIL import Image
-
-from flask import (Flask, flash, make_response, redirect, request, send_file)
-from flask_cors import CORS, cross_origin
+from flask import (Flask, flash, redirect, request, send_file)
+from flask_cors import CORS
 from salsa import Salsa
 
 app = Flask(__name__)
@@ -128,11 +125,3 @@ def split(text: str):
 	"""Splits a string into a char array."""
 	
 	return [char for char in text]
-
-
-def _build_cors_preflight_response():
-    response = make_response()
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add('Access-Control-Allow-Headers', "*")
-    response.headers.add('Access-Control-Allow-Methods', "*")
-    return response
