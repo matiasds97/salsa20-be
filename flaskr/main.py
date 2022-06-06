@@ -1,3 +1,4 @@
+from http.client import UNSUPPORTED_MEDIA_TYPE
 import io
 from PIL import Image
 from flask import (Flask, flash, redirect, request, send_file)
@@ -7,6 +8,9 @@ from salsa import Salsa
 app = Flask(__name__)
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 app.secret_key = "secret key"
+
+ALLOWED_EXTENSIONS = {'png'}
+UNSUPPORTED_MEDIA_TYPE = 415
 
 @app.route("/", methods=['GET'])
 def hello_world():
@@ -30,7 +34,6 @@ def encrypt_text():
 		message = ''.join(message)
 		response = {'message': message}
 		return response, 200
-		# return response
 
 
 @app.route("/encrypt-image/", methods=['POST'])
@@ -41,22 +44,27 @@ def encrypt_image():
 	if request.method == 'POST':
 		if 'file' not in request.files:
 			flash('No file part')
-			return redirect(request.url)
+			return {'error': 'No file part'}, 400
+
 		
 		file = request.files['file']
 		if file.filename == '':
-			flash('No file selected for uploading')
-			return redirect(request.url)
+			return {'error': 'No file selected for uploading'}, 400
 
-		im = Image.open(file)
-		im = im.convert("RGB")
 
-		result = __salsa_encrypt_image(im)
-		img_io = io.BytesIO()
-		result.save(img_io, 'PNG', quality=100)
-		img_io.seek(0)
+		if file and _allowed_file(file.filename):
+			im = Image.open(file)
+			im = im.convert("RGB")
+
+			result = __salsa_encrypt_image(im)
+			img_io = io.BytesIO()
+			result.save(img_io, 'PNG', quality=100)
+			img_io.seek(0)
 	
-		return send_file(img_io, 'image/png')
+			return send_file(img_io, 'image/png')
+
+		response = {'error': "The uploaded file is not allowed."}
+		return response, UNSUPPORTED_MEDIA_TYPE
 
 
 def __salsa_encrypt_image(image: Image) -> Image:
@@ -125,3 +133,10 @@ def split(text: str):
 	"""Splits a string into a char array."""
 	
 	return [char for char in text]
+
+
+def _allowed_file(filename):
+	"""Checks if the file has an allowed extension."""
+
+	return '.' in filename and \
+		filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
