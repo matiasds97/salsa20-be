@@ -71,17 +71,18 @@ def __salsa_encrypt_image(image: Image) -> Image:
 	"""Encrypts or decrypts an image with Salsa20 Symmetric Stream Cypher."""
 
 #Changed the key (1,33) #NONCE:  [3,1,4,1,5,9,2,6]
-	vector = [range(101,133), [9,9,9,9,1,1,1,1], [7,0,0,0,0,0,0,0]]
-
-	s = Salsa()
-	salsa20 = s(key=vector[0],nonce=vector[1], block_counter=vector[2]) #Added
+	vector = [range(101,133), [3,1,4,1,5,9,2,6], [7,0,0,0,0,0,0,0]]
 	result = []
+	z = 0
+	block_counter = [0,0,0,0,0,0,0,0]
+	s = Salsa()
+	salsa20 = s(key=vector[0],nonce=vector[1], block_counter=block_counter) #Added
 	salsa20 = __int_array_to_bytes_array(salsa20)
 	pixel_map = image.load()
 	width = image.size[0]
 	height = image.size[1]
-
-	z = 0
+	
+	
 	for i in range(width):
 		for j in range(height):
 			r, g, b = pixel_map[i,j]
@@ -90,6 +91,15 @@ def __salsa_encrypt_image(image: Image) -> Image:
 			b = salsa20[z % 64] ^ b
 			pixel_map[i,j] = r, g, b
 			z = z + 1
+
+			#print("Z : ", z)
+			if(z%64==63):
+				block_counter[0]=block_counter[0]+1
+				salsa20 = s(key=vector[0],nonce=vector[1], block_counter=block_counter) #Added
+				salsa20 = __int_array_to_bytes_array(salsa20)
+
+			#print("Z%64: ",z[0]%64)
+			
 
 	return image
 
