@@ -37,30 +37,30 @@ class Salsa:
 
   def _round(self):
 
-    # quarterround 1
+     # quarterround 1
     self._s[ 4] ^= self._rotl32((self._s[ 0] + self._s[12]) & self._mask, 7)
-    self._s[ 8] ^= self._rotl32((self._s[ 0] + self._s[ 4]) & self._mask, 9)
-    self._s[12] ^= self._rotl32((self._s[ 4] + self._s[ 8]) & self._mask,13)
-    self._s[ 0] ^= self._rotl32((self._s[ 8] + self._s[12]) & self._mask,18)
+    self._s[ 9] ^= self._rotl32((self._s[ 1] + self._s[ 5]) & self._mask, 7)
+    self._s[14] ^= self._rotl32((self._s[ 6] + self._s[10]) & self._mask, 7)
+    self._s[ 3] ^= self._rotl32((self._s[11] + self._s[15]) & self._mask, 7)
 
     # quarterround 2
-    self._s[ 9] ^= self._rotl32((self._s[ 1] + self._s[ 5]) & self._mask, 7)
+    self._s[ 8] ^= self._rotl32((self._s[ 0] + self._s[ 4]) & self._mask, 9)
     self._s[13] ^= self._rotl32((self._s[ 5] + self._s[ 9]) & self._mask, 9)
-    self._s[ 1] ^= self._rotl32((self._s[ 9] + self._s[13]) & self._mask,13)
-    self._s[ 5] ^= self._rotl32((self._s[ 1] + self._s[13]) & self._mask,18)
-
-    # quarterround 3
-    self._s[14] ^= self._rotl32((self._s[ 6] + self._s[10]) & self._mask, 7)
     self._s[ 2] ^= self._rotl32((self._s[10] + self._s[14]) & self._mask, 9)
-    self._s[ 6] ^= self._rotl32((self._s[ 2] + self._s[14]) & self._mask,13)
-    self._s[10] ^= self._rotl32((self._s[ 2] + self._s[ 6]) & self._mask,18)
-
-    # quarterround 4
-    self._s[ 3] ^= self._rotl32((self._s[11] + self._s[15]) & self._mask, 7)
     self._s[ 7] ^= self._rotl32((self._s[ 3] + self._s[15]) & self._mask, 9)
+    
+    # quarterround 3
+    self._s[12] ^= self._rotl32((self._s[ 4] + self._s[ 8]) & self._mask,13)
+    self._s[ 1] ^= self._rotl32((self._s[ 9] + self._s[13]) & self._mask,13)
+    self._s[ 6] ^= self._rotl32((self._s[ 2] + self._s[14]) & self._mask,13)
     self._s[11] ^= self._rotl32((self._s[ 3] + self._s[ 7]) & self._mask,13)
+    
+    # quarterround 4
+    self._s[ 0] ^= self._rotl32((self._s[ 8] + self._s[12]) & self._mask,18)
+    self._s[ 5] ^= self._rotl32((self._s[ 1] + self._s[13]) & self._mask,18)
+    self._s[10] ^= self._rotl32((self._s[ 2] + self._s[ 6]) & self._mask,18)
     self._s[15] ^= self._rotl32((self._s[ 7] + self._s[11]) & self._mask,18)
-
+    
     # transpose
     self._s = [self._s[ 0], self._s[ 4], self._s[ 8], self._s[12],
                self._s[ 1], self._s[ 5], self._s[ 9], self._s[13],

@@ -45,7 +45,7 @@ def encrypt_image():
 		if 'file' not in request.files:
 			flash('No file part')
 			return {'error': 'No file part'}, 400
-
+		
 		
 		file = request.files['file']
 		if file.filename == '':
@@ -70,9 +70,11 @@ def encrypt_image():
 def __salsa_encrypt_image(image: Image) -> Image:
 	"""Encrypts or decrypts an image with Salsa20 Symmetric Stream Cypher."""
 
+#Changed the key (1,33) #NONCE:  [3,1,4,1,5,9,2,6]
+	vector = [range(101,133), [9,9,9,9,1,1,1,1], [7,0,0,0,0,0,0,0]]
 
 	s = Salsa()
-	salsa20 = s()
+	salsa20 = s(key=vector[0],nonce=vector[1], block_counter=vector[2]) #Added
 	result = []
 	salsa20 = __int_array_to_bytes_array(salsa20)
 	pixel_map = image.load()
